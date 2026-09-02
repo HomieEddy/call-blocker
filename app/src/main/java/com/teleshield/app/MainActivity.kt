@@ -3,7 +3,7 @@ package com.teleshield.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Text
+import com.teleshield.app.ui.navigation.TeleShieldNavHost
 import com.teleshield.app.ui.theme.TeleShieldTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             TeleShieldTheme {
-                Text("TeleShield")
+                TeleShieldNavHost()
             }
         }
     }
