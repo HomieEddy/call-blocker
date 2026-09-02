@@ -15,6 +15,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -28,10 +29,12 @@ abstract class RepositoryModule {
 
     companion object {
         @Provides
+        @Singleton
         fun provideCachingScreeningRuleRepository(room: RoomScreeningRuleRepository): ScreeningRuleRepository =
             CachingScreeningRuleRepository(room)
 
         @Provides
+        @Singleton
         fun provideCachingSystemConfigurationRepository(dataStore: DataStoreSystemConfigurationRepository): SystemConfigurationRepository =
             CachingSystemConfigurationRepository(dataStore)
     }
