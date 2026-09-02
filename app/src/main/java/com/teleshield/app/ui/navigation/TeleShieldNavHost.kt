@@ -1,15 +1,74 @@
 package com.teleshield.app.ui.navigation
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.teleshield.app.ui.audit.AuditLogScreen
 import com.teleshield.app.ui.rules.RulesScreen
+import com.teleshield.app.ui.settings.SettingsScreen
+import com.teleshield.app.ui.simulator.SimulatorScreen
+
+private data class Destination(val route: String, val label: String, val icon: ImageVector)
+
+private val destinations = listOf(
+    Destination("rules", "Rules", Icons.AutoMirrored.Filled.List),
+    Destination("simulator", "Simulator", Icons.Default.Phone),
+    Destination("audit", "Audit Log", Icons.Default.Info),
+    Destination("settings", "Settings", Icons.Default.Settings),
+)
 
 @Composable
 fun TeleShieldNavHost() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "rules") {
-        composable("rules") { RulesScreen() }
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                destinations.forEach { dest ->
+                    NavigationBarItem(
+                        selected = currentRoute == dest.route,
+                        onClick = {
+                            navController.navigate(dest.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(dest.icon, contentDescription = null) },
+                        label = { Text(dest.label) },
+                    )
+                }
+            }
+        },
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "rules",
+            modifier = Modifier.padding(innerPadding),
+        ) {
+            composable("rules") { RulesScreen() }
+            composable("simulator") { SimulatorScreen() }
+            composable("audit") { AuditLogScreen() }
+            composable("settings") { SettingsScreen() }
+        }
     }
 }
