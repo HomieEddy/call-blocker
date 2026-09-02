@@ -50,6 +50,24 @@ class AddRuleUseCaseTest {
     }
 
     @Test
+    fun `uses a provided id instead of generating one`() {
+        val repository = FakeRuleRepository()
+        val useCase = AddRuleUseCase(ruleRepository = repository, idGenerator = { "gen-id" })
+
+        val saved = useCase.execute(
+            AddRuleUseCase.AddRuleRequest(
+                patternExpression = "1555*",
+                ruleType = RuleType.WILDCARD,
+                label = "Exchange block",
+                isWhitelist = false,
+                id = "existing-id",
+            ),
+        )
+
+        assertEquals("existing-id", saved.id)
+    }
+
+    @Test
     fun `rejects an invalid rule and does not save`() {
         val repository = FakeRuleRepository()
         val useCase = AddRuleUseCase(ruleRepository = repository, idGenerator = { "gen-id" })

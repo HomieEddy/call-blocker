@@ -16,11 +16,12 @@ class AddRuleUseCase(
         val label: String,
         val isWhitelist: Boolean,
         val isEnabled: Boolean = true,
+        val id: String? = null,
     )
 
     fun execute(request: AddRuleRequest): ScreeningRule {
         val rule = ScreeningRule(
-            id = idGenerator(),
+            id = request.id ?: idGenerator(),
             pattern = PatternExpression(request.patternExpression),
             label = request.label,
             ruleType = request.ruleType,
