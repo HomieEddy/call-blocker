@@ -65,6 +65,17 @@ class InMemoryScreeningRuleRepositoryTest {
     }
 
     @Test
+    fun `findAll returns every rule regardless of state`() {
+        repository.save(rule("on", enabled = true))
+        repository.save(rule("off", enabled = false))
+        repository.save(rule("wl", enabled = true, isWhitelist = true))
+
+        val all = repository.findAll()
+
+        assertEquals(setOf("on", "off", "wl"), all.map { it.id }.toSet())
+    }
+
+    @Test
     fun `incrementTriggerCount bumps the counter and sets lastTriggeredAt`() {
         repository.save(rule("r1", enabled = true))
 

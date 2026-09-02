@@ -80,6 +80,7 @@ class SimulateCallUseCaseTest {
     private class FakeRuleRepository(private val rules: MutableList<ScreeningRule>) : ScreeningRuleRepository {
         var incrementedCallCount = 0
 
+        override fun findAll(): List<ScreeningRule> = rules.toList()
         override fun findActiveRules(): List<ScreeningRule> = rules.filter { it.isEnabled }
         override fun findWhitelistRules(): List<ScreeningRule> = rules.filter { it.isWhitelist }
         override fun findById(id: String): ScreeningRule? = rules.firstOrNull { it.id == id }

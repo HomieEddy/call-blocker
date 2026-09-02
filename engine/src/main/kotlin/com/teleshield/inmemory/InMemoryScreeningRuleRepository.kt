@@ -7,6 +7,7 @@ class InMemoryScreeningRuleRepository : ScreeningRuleRepository {
 
     private val store = LinkedHashMap<String, ScreeningRule>()
 
+    override fun findAll(): List<ScreeningRule> = store.values.toList()
     override fun findActiveRules(): List<ScreeningRule> = store.values.filter { it.isEnabled }
     override fun findWhitelistRules(): List<ScreeningRule> = store.values.filter { it.isWhitelist }
     override fun findById(id: String): ScreeningRule? = store[id]

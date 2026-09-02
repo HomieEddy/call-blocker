@@ -71,6 +71,7 @@ class AddRuleUseCaseTest {
     private class FakeRuleRepository : ScreeningRuleRepository {
         val saved = mutableListOf<ScreeningRule>()
 
+        override fun findAll(): List<ScreeningRule> = saved.toList()
         override fun findActiveRules(): List<ScreeningRule> = saved.filter { it.isEnabled }
         override fun findWhitelistRules(): List<ScreeningRule> = saved.filter { it.isWhitelist }
         override fun findById(id: String): ScreeningRule? = saved.firstOrNull { it.id == id }

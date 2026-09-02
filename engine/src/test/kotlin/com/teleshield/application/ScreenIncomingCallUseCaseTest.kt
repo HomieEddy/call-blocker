@@ -119,6 +119,7 @@ class ScreenIncomingCallUseCaseTest {
         val incremented = mutableListOf<String>()
         fun incrementedContains(id: String): Boolean = incremented.contains(id)
 
+        override fun findAll(): List<ScreeningRule> = rules.toList()
         override fun findActiveRules(): List<ScreeningRule> = rules.filter { it.isEnabled }
         override fun findWhitelistRules(): List<ScreeningRule> = rules.filter { it.isWhitelist }
         override fun findById(id: String): ScreeningRule? = rules.firstOrNull { it.id == id }
