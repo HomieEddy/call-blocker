@@ -53,6 +53,15 @@ class RoomBlockedCallRecordRepositoryTest {
         assertEquals(listOf("new"), repository.getAllRecords(10, 0).map { it.id })
     }
 
+    @Test
+    fun `delete removes a record and reports success`() {
+        repository.save(record("1", 100L))
+
+        assertEquals(true, repository.delete("1"))
+        assertEquals(emptyList(), repository.getAllRecords(10, 0).map { it.id })
+        assertEquals(false, repository.delete("1"))
+    }
+
     private fun record(id: String, timestamp: Long) = BlockedCallRecord(
         id = id,
         callerIdentifier = "15551234567",

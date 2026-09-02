@@ -1,7 +1,5 @@
 package com.teleshield.application
 
-import com.teleshield.domain.RuleType
-import com.teleshield.domain.PatternExpression
 import com.teleshield.domain.ScreeningRule
 import com.teleshield.ports.ScreeningRuleRepository
 import kotlin.test.Test
