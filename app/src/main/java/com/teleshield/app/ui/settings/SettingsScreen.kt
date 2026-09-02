@@ -1,5 +1,7 @@
 package com.teleshield.app.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -24,9 +27,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.teleshield.app.screening.AndroidScreeningRoleController
+import com.teleshield.app.screening.ScreeningRoleController
 
 private val retentionOptions = listOf(
     7 to "7 days",
@@ -41,6 +47,7 @@ private val retentionOptions = listOf(
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val config = uiState.config ?: return
+    val context = LocalContext.current
 
     Scaffold(topBar = { TopAppBar(title = { Text("Settings") }) }) { padding ->
         Column(
@@ -50,6 +57,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
             ToggleSetting("Master screening", config.masterScreeningEnabled, viewModel::setMasterEnabled)
             ToggleSetting("Block unknown callers", config.blockUnknownEnabled, viewModel::setBlockUnknown)
             RetentionSetting(config.logRetentionDays, viewModel::setRetention)
+            ScreeningRoleRow(remember { AndroidScreeningRoleController(context) })
         }
     }
 }
@@ -86,6 +94,23 @@ private fun RetentionSetting(selectedDays: Int, onSelect: (Int) -> Unit) {
                     onClick = { onSelect(days); expanded = false },
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ScreeningRoleRow(controller: ScreeningRoleController) {
+    var roleHeld by remember { mutableStateOf(controller.isRoleHeld()) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        roleHeld = controller.isRoleHeld()
+    }
+
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        val status = if (roleHeld) "Enabled" else "Not enabled"
+        Text("Call screening  ·  $status", Modifier.weight(1f))
+        Spacer(Modifier.width(8.dp))
+        Button(onClick = { launcher.launch(controller.requestRoleIntent()) }) {
+            Text(if (roleHeld) "Configure" else "Enable")
         }
     }
 }
