@@ -25,22 +25,24 @@ import androidx.compose.ui.unit.dp
 import com.teleshield.application.AddRuleUseCase
 import com.teleshield.domain.PatternExpression
 import com.teleshield.domain.RuleType
+import com.teleshield.domain.ScreeningRule
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddRuleDialog(
     onDismiss: () -> Unit,
     onAdd: (AddRuleUseCase.AddRuleRequest) -> Unit,
+    initialRule: ScreeningRule? = null,
 ) {
-    var pattern by remember { mutableStateOf("") }
-    var label by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf(RuleType.EXACT) }
-    var isWhitelist by remember { mutableStateOf(false) }
+    var pattern by remember { mutableStateOf(initialRule?.pattern?.expression ?: "") }
+    var label by remember { mutableStateOf(initialRule?.label ?: "") }
+    var type by remember { mutableStateOf(initialRule?.ruleType ?: RuleType.EXACT) }
+    var isWhitelist by remember { mutableStateOf(initialRule?.isWhitelist ?: false) }
     val isInputValid = pattern.isNotBlank() && PatternExpression(pattern).isValid(type)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add rule") },
+        title = { Text(if (initialRule == null) "Add rule" else "Edit rule") },
         text = {
             Column {
                 OutlinedTextField(value = pattern, onValueChange = { pattern = it }, label = { Text("Pattern") })
@@ -56,10 +58,10 @@ fun AddRuleDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    onAdd(AddRuleUseCase.AddRuleRequest(pattern, type, label, isWhitelist))
+                    onAdd(AddRuleUseCase.AddRuleRequest(pattern, type, label, isWhitelist, id = initialRule?.id))
                 },
                 enabled = isInputValid,
-            ) { Text("Add") }
+            ) { Text(if (initialRule == null) "Add" else "Save") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )

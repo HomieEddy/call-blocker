@@ -1,5 +1,6 @@
 package com.teleshield.app.ui.rules
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,39 +29,46 @@ import com.teleshield.domain.ScreeningRule
 @Composable
 fun RulesScreen(viewModel: RulesViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var showAddDialog by remember { mutableStateOf(false) }
+    var editingRule by remember { mutableStateOf<ScreeningRule?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Rules") }) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
+            FloatingActionButton(onClick = { editingRule = null; showDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Add rule")
             }
         },
     ) { padding ->
         LazyColumn(Modifier.padding(padding)) {
             items(uiState.rules, key = { it.id }) { rule ->
-                RuleRow(rule = rule, onDelete = { viewModel.deleteRule(rule.id) })
+                RuleRow(
+                    rule = rule,
+                    onClick = { editingRule = rule; showDialog = true },
+                    onDelete = { viewModel.deleteRule(rule.id) },
+                )
             }
         }
     }
 
-    if (showAddDialog) {
+    if (showDialog) {
         AddRuleDialog(
-            onDismiss = { showAddDialog = false },
+            onDismiss = { showDialog = false },
             onAdd = { request ->
                 viewModel.addRule(request)
-                showAddDialog = false
+                showDialog = false
             },
+            initialRule = editingRule,
         )
     }
 }
 
 @Composable
-private fun RuleRow(rule: ScreeningRule, onDelete: () -> Unit) {
+private fun RuleRow(rule: ScreeningRule, onClick: () -> Unit, onDelete: () -> Unit) {
     ListItem(
         headlineContent = { Text(rule.label.ifBlank { rule.pattern.expression }) },
         supportingContent = { Text("${rule.ruleType.name} · ${rule.pattern.expression}") },
+        modifier = Modifier.clickable(onClick = onClick),
         trailingContent = {
             IconButton(onClick = onDelete) {
                 Icon(Icons.Default.Delete, contentDescription = "Delete")
