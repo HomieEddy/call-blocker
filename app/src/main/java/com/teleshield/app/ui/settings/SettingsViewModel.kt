@@ -43,9 +43,11 @@ class SettingsViewModel @Inject constructor(
     fun setRetention(days: Int) = update { it.copy(logRetentionDays = days) }
 
     private fun update(transform: (ScreeningConfiguration) -> ScreeningConfiguration) {
-        val current = _uiState.value.config ?: return
         viewModelScope.launch {
-            val updated = withContext(ioDispatcher) { transform(current).also { configurationRepository.save(it) } }
+            val updated = withContext(ioDispatcher) {
+                val latest = _uiState.value.config ?: return@withContext null
+                transform(latest).also { configurationRepository.save(it) }
+            } ?: return@launch
             _uiState.value = SettingsUiState(updated)
         }
     }
