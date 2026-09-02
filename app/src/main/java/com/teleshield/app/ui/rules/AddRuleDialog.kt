@@ -9,6 +9,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.teleshield.application.AddRuleUseCase
+import com.teleshield.domain.PatternExpression
 import com.teleshield.domain.RuleType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +36,7 @@ fun AddRuleDialog(
     var label by remember { mutableStateOf("") }
     var type by remember { mutableStateOf(RuleType.EXACT) }
     var isWhitelist by remember { mutableStateOf(false) }
+    val isInputValid = pattern.isNotBlank() && PatternExpression(pattern).isValid(type)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -51,9 +54,12 @@ fun AddRuleDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onAdd(AddRuleUseCase.AddRuleRequest(pattern, type, label, isWhitelist))
-            }) { Text("Add") }
+            TextButton(
+                onClick = {
+                    onAdd(AddRuleUseCase.AddRuleRequest(pattern, type, label, isWhitelist))
+                },
+                enabled = isInputValid,
+            ) { Text("Add") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
@@ -72,7 +78,7 @@ private fun RuleTypeSelector(selected: RuleType, onSelect: (RuleType) -> Unit) {
             readOnly = true,
             label = { Text("Type") },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            modifier = Modifier.menuAnchor(),
+            modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryNotEditable),
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
