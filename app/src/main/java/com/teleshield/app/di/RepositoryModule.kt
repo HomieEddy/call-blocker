@@ -1,5 +1,7 @@
 package com.teleshield.app.di
 
+import com.teleshield.app.data.CachingScreeningRuleRepository
+import com.teleshield.app.data.CachingSystemConfigurationRepository
 import com.teleshield.app.data.DataStoreSystemConfigurationRepository
 import com.teleshield.app.data.NoOpTelephonyInterceptionPort
 import com.teleshield.app.data.RoomBlockedCallRecordRepository
@@ -10,6 +12,7 @@ import com.teleshield.ports.SystemConfigurationRepository
 import com.teleshield.ports.TelephonyInterceptionPort
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
@@ -18,14 +21,18 @@ import dagger.hilt.components.SingletonComponent
 abstract class RepositoryModule {
 
     @Binds
-    abstract fun bindScreeningRuleRepository(impl: RoomScreeningRuleRepository): ScreeningRuleRepository
-
-    @Binds
     abstract fun bindBlockedCallRecordRepository(impl: RoomBlockedCallRecordRepository): BlockedCallRecordRepository
 
     @Binds
-    abstract fun bindSystemConfigurationRepository(impl: DataStoreSystemConfigurationRepository): SystemConfigurationRepository
-
-    @Binds
     abstract fun bindTelephonyInterceptionPort(impl: NoOpTelephonyInterceptionPort): TelephonyInterceptionPort
+
+    companion object {
+        @Provides
+        fun provideCachingScreeningRuleRepository(room: RoomScreeningRuleRepository): ScreeningRuleRepository =
+            CachingScreeningRuleRepository(room)
+
+        @Provides
+        fun provideCachingSystemConfigurationRepository(dataStore: DataStoreSystemConfigurationRepository): SystemConfigurationRepository =
+            CachingSystemConfigurationRepository(dataStore)
+    }
 }
